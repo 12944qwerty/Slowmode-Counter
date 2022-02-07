@@ -1,5 +1,5 @@
 const { Plugin } = require('powercord/entities');
-const { getModule, channels, React, getModuleByDisplayName, FluxDispatcher } = require('powercord/webpack');
+const { getModule, i18n: { Messages }, channels, React, getModuleByDisplayName, FluxDispatcher } = require('powercord/webpack');
 const { inject, uninject } = require('powercord/injector');
 const { getChannel } = getModule(['getMutableGuildChannels'], false);
 const { findInReactTree } = require('powercord/util');
@@ -45,12 +45,12 @@ module.exports = class SandBox extends Plugin {
 			const original = tooltip.children;
 			tooltip.children = (props) => {
 				const ret = original(props);
-				if (ret.props.children[0] !== "Slowmode is enabled, but you are immune. Amazing!") return ret;
+				if (ret.props.children[0] !== Messages["CHANNEL_SLOWMODE_DESC_IMMUNE"]) return ret;
 		
 				let currentChannel = getChannel(channels.getChannelId());
 		
 				ret.props.children[0] = React.createElement(React.Fragment, null, 
-					"Slowmode is enabled, but you are immune. Amazing! ", 
+					Messages["CHANNEL_SLOWMODE_DESC_IMMUNE"] + " ", // Uses space to separate from Timer
 					React.createElement(Timer, {
 						calculate() {
 							let msg = lastMessage[currentChannel.id]
