@@ -4,12 +4,12 @@ const { inject, uninject } = require('powercord/injector');
 const { getChannel } = getModule(['getMutableGuildChannels'], false);
 const { findInReactTree } = require('powercord/util');
 
-const { getCurrentUser } = getModule([ 'getCurrentUser', 'getUser' ], false);
-
-lastMessage = {}
+let lastMessage = {}
 
 module.exports = class SandBox extends Plugin {
     async startPlugin() {
+        const { getCurrentUser } = await getModule([ 'getCurrentUser', 'getUser' ]);
+
 		const currentUser = getCurrentUser()
 
 		FluxDispatcher.subscribe("MESSAGE_CREATE", this.cacheMessage = (args) => {
@@ -17,7 +17,7 @@ module.exports = class SandBox extends Plugin {
 
 			let msg = args.message;
 
-			if (!lastMessage[msg.channel_id]) lastMessage[msg.channel_id];
+			if (!lastMessage[msg.channel_id]) lastMessage[msg.channel_id] = {};
 
 			lastMessage[msg.channel_id] = {id: msg.id, timestamp: new Date(msg.timestamp)}
 		})
@@ -60,7 +60,6 @@ module.exports = class SandBox extends Plugin {
 							let rateLimit = currentChannel.rateLimitPerUser * 1000 + 1000;
 							let d = ((new Date()) - msg.timestamp);
 							let difference = rateLimit - d;
-							console.log(rateLimit, d, difference)
 
 							if (difference < 0) return 0
 							return difference;
