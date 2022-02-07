@@ -1,0 +1,7 @@
+{
+  "name": "Slowmode Counter",
+  "description": "Shows slowmode time even if you are immune.",
+  "author": "12944qwerty",
+  "license": "MIT",
+  "version": "1.0.0"
+}
