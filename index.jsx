@@ -7,15 +7,21 @@ const SlowmodeStore = require('./lib/Store');
 const ErrorBoundary = require('./components/ErrorBoundary');
 
 module.exports = class SlowmodeCounter extends Plugin {
+	constructor () {
+		super();
+
+		this.slowmodeStore.initializeIfNeeded();
+	}
+
 	get slowmodeStore () {
 		return SlowmodeStore;
 	}
 
-	async startPlugin () {
+	startPlugin () {
 		const _this = this;
 
-		const { SlowmodeType } = await getModule([ 'SlowmodeType' ]);
-		const { useStateFromStores } = await getModule([ 'useStateFromStores' ]);
+		const { SlowmodeType } = getModule([ 'SlowmodeType' ], false);
+		const { useStateFromStores } = getModule([ 'useStateFromStores' ], false);
 
 		const SlowmodeCooldown = ({ channel, isThreadCreation }) => {
 			const { slowmodeCooldownGuess } = useStateFromStores([ SlowmodeStore ], () => ({
@@ -25,7 +31,7 @@ module.exports = class SlowmodeCounter extends Plugin {
 			return `${Messages.CHANNEL_SLOWMODE_DESC_IMMUNE}${slowmodeCooldownGuess > 0 ? ` ${this.millisecondsToReadableFormat(slowmodeCooldownGuess)}` : ''}`;
 		};
 
-		const TypingUsers = (await getModuleByDisplayName('FluxContainer(TypingUsers)')).prototype.render.call({ memoizedGetStateFromStores: () => ({}) }).type;
+		const TypingUsers = getModuleByDisplayName('FluxContainer(TypingUsers)', false).prototype.render.call({ memoizedGetStateFromStores: () => ({}) }).type;
 		if (!TypingUsers) return this.error('Missing “TypingUsers” component - skipping injection');
 
 		inject('force-slowmode-timer', TypingUsers.prototype, 'render', function (_, res) {
