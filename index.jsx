@@ -30,11 +30,11 @@ module.exports = class SlowmodeCounter extends Plugin {
 				slowmodeCooldownGuess: SlowmodeStore.getSlowmodeCooldownGuess(channel.id, isThreadCreation ? SlowmodeType.CreateThread : SlowmodeType.SendMessage)
 			}));
 
-			return `${renderCounterOnly ? Messages.CHANNEL_SLOWMODE_DESC_IMMUNE : ''}${slowmodeCooldownGuess > 0 ? ` ${this.millisecondsToReadableFormat(slowmodeCooldownGuess)}` : ''}`;
+			return `${renderCounterOnly ? '' : Messages.CHANNEL_SLOWMODE_DESC_IMMUNE}${slowmodeCooldownGuess > 0 ? ` ${this.millisecondsToReadableFormat(slowmodeCooldownGuess)}` : ''}`;
 		};
 
-		const TypingUsers = getModuleByDisplayName('FluxContainer(TypingUsers)', false).prototype.render.call({ memoizedGetStateFromStores: () => ({}) }).type;
-		if (!TypingUsers) return this.error('Missing “TypingUsers” component - skipping injection');
+		const TypingUsers = getModuleByDisplayName('FluxContainer(TypingUsers)', false).prototype?.render?.call({ memoizedGetStateFromStores: () => ({}) })?.type;
+		if (!TypingUsers) return this.error('Missing “TypingUsers” component; skipping injection');
 
 		inject('force-slowmode-timer', TypingUsers.prototype, 'render', function (_, res) {
 			const { channel, isBypassSlowmode, isThreadCreation } = this.props;
@@ -50,7 +50,7 @@ module.exports = class SlowmodeCounter extends Plugin {
 				const res = children(props);
 
 				res.props.children[0] = <ErrorBoundary main={_this}>
-					<SlowmodeCooldown channel={channel} isThreadCreation={isThreadCreation} renderCounterOnly={res.props.children[0] === Messages.CHANNEL_SLOWMODE_DESC_IMMUNE} />
+					<SlowmodeCooldown channel={channel} isThreadCreation={isThreadCreation} renderCounterOnly={res.props.children[0] !== Messages.CHANNEL_SLOWMODE_DESC_IMMUNE} />
 				</ErrorBoundary>;
 
 				return res;
@@ -65,7 +65,7 @@ module.exports = class SlowmodeCounter extends Plugin {
 		const seconds = String(duration.seconds()).padStart(2, '0');
 
 		if (ms > 1e3 * Durations.HOUR) {
-			const minutes = String(duration.minutes()).padStart(2, '0')
+			const minutes = String(duration.minutes()).padStart(2, '0');
 
 			return duration.hours() + ':' + minutes + ':' + seconds;
 		} else {
